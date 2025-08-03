@@ -67,18 +67,20 @@
 <div class="row">
     <div class="col-md-6">
       <canvas id="categoryChart"></canvas>
+      {{ category_name|json_script:"category-names" }}
+      {{ category_totals|json_script:"category-totals" }}
       <script>
         const ctx = document.getElementById('categoryChart').getContext('2d');
-        //const categoryNames = JSON.parse('{{category_names|escapejs}}')
-        //const categoryTotals = JSON.parse('{{category_totals|escapejs}}')
+        const categoryNames = JSON.parse(document.getElementById('category-names').textContent);
+        const categoryTotals = JSON.parse(document.getElementById('category-totals').textContent);
 
        const categoryChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ["Income", "Expense", "Balance"], //categoryNames,
+          labels: categoryNames,
           datasets: [{
             label: 'Total by Category',
-            data: [30000, 930, 29070], // categoryTotals,
+            data: categoryTotals,
             backgroundColor: 'rgba(54, 162, 235, 0.6)',
             borderColor: 'rgba(54, 162, 235, 1)',
             borderWidth: 1

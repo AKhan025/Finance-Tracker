@@ -35,8 +35,8 @@ def dashboard(request):
         'income' : income,
         'expense' : expense,
         'balance' : balance,
-        'category_name': json.dumps(category_name, cls=DecimalEncoder),
-        'category_total': json.dumps(category_totals, cls=DecimalEncoder),
+        'category_name': category_name,
+        'category_totals': category_totals,
     }
 
     return render(request, 'finance/dashboard.html', context)
