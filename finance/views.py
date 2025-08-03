@@ -4,11 +4,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.db.models.functions import ExtractMonth, ExtractYear
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.contrib import messages
+
 from .models import Transaction, Category
 from .forms import TransactionForm
 
 # Create your views here.
-@login_required
+@login_required(login_url="login")
 def dashboard(request):
     transactions = Transaction.objects.filter(user=request.user).order_by('-date')
     income = sum(t.amount for t in transactions if t.type == 'Income')
@@ -56,7 +60,7 @@ def dashboard(request):
     return render(request, 'finance/dashboard.html', context)
 
 
-@login_required
+@login_required(login_url="login")
 def add_transaction(request):
     if request.method == "POST":
         form = TransactionForm(request.POST)
@@ -70,6 +74,7 @@ def add_transaction(request):
 
     return render(request, 'finance/add_transaction.html', {'form': form})
 
+@login_required(login_url="login")
 def edit_transaction(request, pk):
     transaction = get_object_or_404(Transaction, pk=pk)
     form = TransactionForm(request.POST or None, instance=transaction)
@@ -78,9 +83,38 @@ def edit_transaction(request, pk):
         return redirect('dashboard')
     return render(request, 'finance/edit_transaction.html', {'form': form})
 
+@login_required(login_url="login")
 def delete_transaction(request, pk):
     transaction = get_object_or_404(Transaction, pk=pk)
     if request.method == "POST":
         transaction.delete()
         return redirect('dashboard')
     return render(request, 'finance/delete_transaction.html', {'transaction': transaction})
+
+def signup_view(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already taken")
+        else:
+            user = User.objects.create_user(username=username, password=password)
+            login(request, user)
+            return redirect("dashboard")
+    return redirect(request, "finance/signup.html")
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect("dashboard")
+        else:
+            messages.error(request, "Invalid Username or Password")
+    return redirect(request, "finance/login.html")
+
+def logout_view(request):
+    logout(request)
+    return redirect("login")
