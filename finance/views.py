@@ -1,8 +1,9 @@
 import json
-from decimal import Decimal
+import calendar
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from django.db.models.functions import ExtractMonth, ExtractYear
 from .models import Transaction, Category
 from .forms import TransactionForm
 
@@ -13,6 +14,18 @@ def dashboard(request):
     income = sum(t.amount for t in transactions if t.type == 'Income')
     expense = sum(t.amount for t in transactions if t.type == 'Expense')
     balance = income - expense
+
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+
+    if month:
+        transactions = transactions.filter(date__month=month)
+
+    if year:
+        transactions = transactions.filter(date__year=year)
+
+    months = [(i, calendar.month_name[i]) for i in range(1, 13)]
+    years = Transaction.objects.annotate(year=ExtractYear('date')).values_list('year', flat=True).distinct()
 
     categories = Category.objects.all()
     category_name = [c.name for c in categories]
@@ -34,6 +47,10 @@ def dashboard(request):
         'category_totals': category_totals,
         'income_total': income_total,
         'expense_total': expense_total,
+        'selected_month': int(month) if month else '',
+        'selected_year': int(year) if year else '',
+        'months': months,
+        'years': sorted(years, reverse=True),
     }
 
     return render(request, 'finance/dashboard.html', context)
