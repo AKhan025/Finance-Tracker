@@ -3,6 +3,12 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
+
+{{ category_name|json_script:"category-names" }}
+{{ category_totals|json_script:"category-totals" }}
+{{ income_total|json_script:"income-total" }}
+{{ expense_total|json_script:"expense-total" }}
+
 <a href="{% url 'add_transaction' %}" class="btn btn-success mb-3">+ Add Transaction</a>
 
   <h2 class="mb-4">Welcome, {{ request.user.username }}</h2>
@@ -66,9 +72,7 @@
 
 <div class="row">
     <div class="col-md-6">
-      <canvas id="categoryChart"></canvas>
-      {{ category_name|json_script:"category-names" }}
-      {{ category_totals|json_script:"category-totals" }}
+      <canvas margin: 0 id="categoryChart"></canvas>
       <script>
         const ctx = document.getElementById('categoryChart').getContext('2d');
         const categoryNames = JSON.parse(document.getElementById('category-names').textContent);
@@ -98,6 +102,46 @@
       </script>
     </div>
   </div>
+  <div class="row mt-5">
+    <div class="col-md-6">
+      <canvas id="incomeExpenseChart"></canvas>
+      <script>
+        const incomeTotal = JSON.parse(document.getElementById('income-total').textContent);
+        const expenseTotal = JSON.parse(document.getElementById('expense-total').textContent);
+
+        const pieCtx = document.getElementById('incomeExpenseChart').getContext('2d');
+        const incomeExpenseChart = new Chart(pieCtx, {
+          type: 'pie',
+          data: {
+            labels: ['Income', 'Expense'],
+            datasets: [{
+              data: [incomeTotal, expenseTotal],
+              backgroundColor: [
+                'rgba(75, 192, 192, 0.7)',  // Income = teal
+                'rgba(255, 99, 132, 0.7)'   // Expense = red
+              ],
+              borderColor: [
+                'rgba(75, 192, 192, 1)',
+                'rgba(255, 99, 132, 1)'
+              ],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            }
+          }
+        });
+      </script>
+    </div>
+  </div>
+
+
+
 
 {% endblock %}
 

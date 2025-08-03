@@ -1,17 +1,10 @@
 import json
 from decimal import Decimal
-from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from .models import Transaction, Category
 from .forms import TransactionForm
-
-class DecimalEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Decimal):
-            return float(obj)
-        return super(DecimalEncoder, self).default(obj)
 
 # Create your views here.
 @login_required
@@ -29,6 +22,8 @@ def dashboard(request):
         total = Transaction.objects.filter(category=category).aggregate(Sum('amount'))['amount__sum'] or 0
         category_totals.append(total)
 
+    income_total = Transaction.objects.filter(type='Income').aggregate(Sum('amount'))['amount__sum'] or 0
+    expense_total = Transaction.objects.filter(type='Expense').aggregate(Sum('amount'))['amount__sum'] or 0
 
     context = {
         'transactions' : transactions,
@@ -37,6 +32,8 @@ def dashboard(request):
         'balance' : balance,
         'category_name': category_name,
         'category_totals': category_totals,
+        'income_total': income_total,
+        'expense_total': expense_total,
     }
 
     return render(request, 'finance/dashboard.html', context)
