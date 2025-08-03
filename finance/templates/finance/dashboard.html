@@ -71,8 +71,10 @@
   </table>
 
 <div class="row">
+  <div class="row mt-5">
     <div class="col-md-6">
-      <canvas margin: 0 id="categoryChart"></canvas>
+      <h5 class="mt-5 mb-3">Spending by Category</h5>
+      <canvas id="categoryChart" height="250"></canvas>
       <script>
         const ctx = document.getElementById('categoryChart').getContext('2d');
         const categoryNames = JSON.parse(document.getElementById('category-names').textContent);
@@ -101,9 +103,9 @@
       });
       </script>
     </div>
-  </div>
-  <div class="row mt-5">
-    <div class="col-md-6">
+  <div class="col-md-6 d-flex justify-content-center align-items-center">
+    <div style="width: 600px; height: 600px;">
+      <h5 class="mt-5 mb-3">Income vs Expense</h5>
       <canvas id="incomeExpenseChart"></canvas>
       <script>
         const incomeTotal = JSON.parse(document.getElementById('income-total').textContent);
@@ -139,6 +141,7 @@
       </script>
     </div>
   </div>
+</div>
 
 
 
